@@ -1,0 +1,71 @@
+plugins {
+    id 'java'
+}
+
+project.group = 'com.demo'
+project.version = '1.0.0'
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+
+// api {
+//     moduleName = 'completable_feign'
+//     exports 'engineering.clientside.feign.completable'
+// }
+//
+// platforms {
+//   targetPlatforms 'java8', 'java9'
+// }
+
+repositories {
+    /**先从本地仓库查找jar包*/
+    mavenLocal()
+
+    /**再从aliyun镜像下载依赖jar包*/
+    maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
+
+    /**再从maven中央仓库下载依赖jar包*/
+    mavenCentral()
+}
+
+dependencies {
+    testCompile 'junit:junit:+'
+    testCompile 'com.squareup.okhttp3:mockwebserver:+'
+    testCompile('io.github.openfeign:feign-gson:+') {
+        exclude group: 'org.jvnet', module: 'animal-sniffer-annotation'
+    }
+
+    compile('io.github.openfeign:feign-core:+') {
+        exclude group: 'org.jvnet', module: 'animal-sniffer-annotation'
+    }
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src/main/java'
+        }
+    }
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    from sourceSets.main.allSource
+    classifier = 'sources'
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    from javadoc.destinationDir
+    classifier 'javadoc'
+}
+
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+}
+
+tasks.withType(FindBugs) {
+    reports {
+        xml.enabled = false
+        html.enabled = true
+    }
+}
+
